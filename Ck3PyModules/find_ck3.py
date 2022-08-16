@@ -20,12 +20,12 @@ def find_steamapps_directory():
         key4 = winreg.OpenKey(key3, "Steam")
         (path, type) = winreg.QueryValueEx(key4, "InstallPath")
         if type == winreg.REG_EXPAND_SZ:
-            path = winreg.ExpandEnvironmentStrings(path.joinpath("steamapps"))
+            path = winreg.ExpandEnvironmentStrings(path)
         winreg.CloseKey(key4)
         winreg.CloseKey(key3)
         winreg.CloseKey(key2)
         winreg.CloseKey(key1)
-        path = pathlib.Path(path)
+        path = pathlib.Path(path).joinpath("steamapps")
     elif platform.system() == "Linux":
         path = pathlib.Path(STEAM_LINUX).expanduser()
     elif platform.system() == "Darwin":

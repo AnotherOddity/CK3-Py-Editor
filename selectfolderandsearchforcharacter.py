@@ -3,7 +3,7 @@ import tkinter as tk
 import tkinter.filedialog
 from sys import exit as safeExit
 
-from Ck3PyEditor import find_ck3
+from Ck3PyModules import find_ck3
 
 def ask_user_ck3_dir():
     #Initialising a tkinter root window.
@@ -39,7 +39,11 @@ def ask_user_ck3_dir():
                 safeExit('Exiting program...')
     return pathlib.Path(strRootDir)
 
-pathRootDir = find_ck3.find_ck3_game_directory()
+pathRootDir = None
+try:
+    pathRootDir = find_ck3.find_ck3_game_directory()
+except:
+    pass
 if pathRootDir is None:
     pathRootDir = ask_user_ck3_dir()
 
