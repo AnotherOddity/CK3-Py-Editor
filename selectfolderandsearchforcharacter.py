@@ -3,7 +3,7 @@ import tkinter as tk
 import tkinter.filedialog
 from sys import exit as safeExit
 
-from Ck3PyEditor import find_ck3
+from Ck3PyModules import find_ck3
 
 def ask_user_ck3_dir():
     #Initialising a tkinter root window.
