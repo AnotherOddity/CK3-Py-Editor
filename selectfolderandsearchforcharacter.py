@@ -3,40 +3,46 @@ import tkinter as tk
 import tkinter.filedialog
 from sys import exit as safeExit
 
+from Ck3PyEditor import find_ck3
 
-#Initialising a tkinter root window.
-root = tk.Tk()
-root.withdraw() #Hiding, but not closing, the root window.
-root.attributes('-topmost', True)
+def ask_user_ck3_dir():
+    #Initialising a tkinter root window.
+    root = tk.Tk()
+    root.withdraw() #Hiding, but not closing, the root window.
+    root.attributes('-topmost', True)
 
-#This asks the user to locate the vanilla CK3 game files.
-while True:
-    strRootDir = tk.filedialog.askdirectory(
-        mustexist=True,
-        title='Please select CK3 installation folder'
-    )
-    print('Checking...')
-    if strRootDir[-24:] == '/Crusader Kings III/game':
-        print(strRootDir)
-        break
-    elif strRootDir[-19:] == '/Crusader Kings III':
-        print(strRootDir)
-        print('...adding /game')
-        strRootDir += '/game'
-        print(strRootDir)
-        break
-    else:
-        print('Error! Path: '+strRootDir)
-        retryQuery = tk.messagebox.askretrycancel(
-            title='Error!',
-            message='That folder doesn\'t look like the CK3 directory. Do you want to try again?'
+    #This asks the user to locate the vanilla CK3 game files.
+    while True:
+        strRootDir = tk.filedialog.askdirectory(
+            mustexist=True,
+            title='Please select CK3 installation folder'
         )
-        if retryQuery == False:
-            print('Cancelling...')
-            root.destroy() #Ensuring the tkinter root window is actually closed.
-            safeExit('Exiting program...')
+        print('Checking...')
+        if strRootDir[-24:] == '/Crusader Kings III/game':
+            print(strRootDir)
+            break
+        elif strRootDir[-19:] == '/Crusader Kings III':
+            print(strRootDir)
+            print('...adding /game')
+            strRootDir += '/game'
+            print(strRootDir)
+            break
+        else:
+            print('Error! Path: '+strRootDir)
+            retryQuery = tk.messagebox.askretrycancel(
+                title='Error!',
+                message='That folder doesn\'t look like the CK3 directory. Do you want to try again?'
+            )
+            if retryQuery == False:
+                print('Cancelling...')
+                root.destroy() #Ensuring the tkinter root window is actually closed.
+                safeExit('Exiting program...')
+    return pathlib.Path(strRootDir)
 
-pathRootDir = pathlib.Path(strRootDir)
+pathRootDir = find_ck3.find_ck3_game_directory()
+if pathRootDir is None:
+    pathRootDir = ask_user_ck3_dir()
+
 print('Checking path...')
 print(pathRootDir)
 #For me, this should return:
