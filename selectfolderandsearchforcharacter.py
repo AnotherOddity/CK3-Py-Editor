@@ -39,7 +39,11 @@ def ask_user_ck3_dir():
                 safeExit('Exiting program...')
     return pathlib.Path(strRootDir)
 
-pathRootDir = find_ck3.find_ck3_game_directory()
+pathRootDir = None
+try:
+    pathRootDir = find_ck3.find_ck3_game_directory()
+except:
+    pass
 if pathRootDir is None:
     pathRootDir = ask_user_ck3_dir()
 
