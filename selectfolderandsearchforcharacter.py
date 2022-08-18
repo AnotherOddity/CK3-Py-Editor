@@ -1,5 +1,6 @@
 import pathlib
 import tkinter as tk
+from tkinter import ttk
 import tkinter.filedialog
 from sys import exit as safeExit
 
@@ -44,10 +45,12 @@ def doSearch():
     print(testFile)
     print('\n\n')
     queryList = query_entry.get().split()
-    # TODO: instead of printing the results, put them in the result_view
-    # with result_view.set()
     with open(testFile) as f:
-        fileSearchCK3(f, 0, *queryList)
+        text = fileSearchCK3(f, 0, *queryList)
+    if text is None or not text:
+        text = "None found."
+    result_var.set(text)
+    result_view.configure(height=len(text.splitlines()))
 
 def build_file_entry(parent):
     label = tk.Label(parent, text="File to search:")
@@ -69,10 +72,26 @@ def build_search_button(parent):
     return button
 
 def build_result_view(parent):
+    # tutorial https://blog.teclado.com/tkinter-scrollable-frames/
+    container = ttk.Frame(parent)
+    canvas = tk.Canvas(container)
+    scrollbar = ttk.Scrollbar(container, orient="vertical", command=canvas.yview)
+    scrollable_frame = ttk.Frame(canvas)
+    scrollable_frame.bind("<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
     var = tk.StringVar()
-    view = tk.Label(parent, height=20, textvariable=var)
+    view = tk.Label(scrollable_frame, height=20, width=80, textvariable=var, anchor='nw')
     view.pack()
-    return var
+
+    container.pack()
+    canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+
+    return (var, view)
 
 #Initialising a tkinter root window.
 root = tk.Tk()
@@ -185,15 +204,19 @@ def fileSearchCK3(file, logicType, *query):
                 currentEntry = []
     else:
         print('CHECKPOINT!\n\n')
+        outtext = ""
         for i in selectedEntries:
             for j in i:
+                outtext += j.replace('\t', '        ')
                 print(j.rstrip('\n'))
+            outtext += '\n\n'
             print('\n\n')
+        return outtext
 
 
 file_entry = build_file_entry(root)
 query_entry = build_query_entry(root)
 search_button = build_search_button(root)
-result_view = build_result_view(root)
+result_var, result_view = build_result_view(root)
 root.deiconify()
 root.mainloop()
