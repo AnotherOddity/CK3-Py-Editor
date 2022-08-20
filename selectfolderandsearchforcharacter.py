@@ -1,16 +1,12 @@
 import pathlib
 import tkinter as tk
+from tkinter import ttk
 import tkinter.filedialog
 from sys import exit as safeExit
 
 from Ck3PyModules import find_ck3
 
 def ask_user_ck3_dir():
-    #Initialising a tkinter root window.
-    root = tk.Tk()
-    root.withdraw() #Hiding, but not closing, the root window.
-    root.attributes('-topmost', True)
-
     #This asks the user to locate the vanilla CK3 game files.
     while True:
         strRootDir = tk.filedialog.askdirectory(
@@ -39,6 +35,69 @@ def ask_user_ck3_dir():
                 safeExit('Exiting program...')
     return pathlib.Path(strRootDir)
 
+def doSearch():
+    charDir = pathlib.PurePath(pathRootDir).joinpath('history', 'characters')
+    print(charDir)
+    fileName = file_entry.get()
+    if not fileName.endswith(".txt"):
+        fileName += ".txt"
+    testFile = charDir.joinpath(fileName)
+    print(testFile)
+    print('\n\n')
+    queryList = query_entry.get().split()
+    with open(testFile) as f:
+        text = fileSearchCK3(f, 0, *queryList)
+    if text is None or not text:
+        text = "None found."
+    result_var.set(text)
+    result_view.configure(height=len(text.splitlines()))
+
+def build_file_entry(parent):
+    label = tk.Label(parent, text="File to search:")
+    entry = tk.Entry(parent)
+    label.pack()
+    entry.pack()
+    return entry
+
+def build_query_entry(parent):
+    label = tk.Label(parent, text="Query string:")
+    entry = tk.Entry(parent)
+    label.pack()
+    entry.pack()
+    return entry
+
+def build_search_button(parent):
+    button = tk.Button(parent, text="Search", command=doSearch)
+    button.pack()
+    return button
+
+def build_result_view(parent):
+    # tutorial https://blog.teclado.com/tkinter-scrollable-frames/
+    container = ttk.Frame(parent)
+    canvas = tk.Canvas(container)
+    scrollbar = ttk.Scrollbar(container, orient="vertical", command=canvas.yview)
+    scrollable_frame = ttk.Frame(canvas)
+    scrollable_frame.bind("<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    var = tk.StringVar()
+    view = tk.Label(scrollable_frame, height=20, width=80, textvariable=var, anchor='nw')
+    view.pack()
+
+    container.pack()
+    canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+
+    return (var, view)
+
+#Initialising a tkinter root window.
+root = tk.Tk()
+root.withdraw() #Hiding, but not closing, the root window.
+root.attributes('-topmost', True)
+
 pathRootDir = None
 try:
     pathRootDir = find_ck3.find_ck3_game_directory()
@@ -51,6 +110,8 @@ print('Checking path...')
 print(pathRootDir)
 #For me, this should return:
 #F:\SteamLibrary\steamapps\common\Crusader Kings III\game
+
+
 
 '''
 #This 'walks down' and records all files and folders within a base folder.
@@ -143,30 +204,19 @@ def fileSearchCK3(file, logicType, *query):
                 currentEntry = []
     else:
         print('CHECKPOINT!\n\n')
+        outtext = ""
         for i in selectedEntries:
             for j in i:
+                outtext += j.replace('\t', '        ')
                 print(j.rstrip('\n'))
+            outtext += '\n\n'
             print('\n\n')
+        return outtext
 
 
-
-charDir = pathlib.PurePath(pathRootDir).joinpath('history', 'characters')
-print(charDir)
-testFile = pathlib.PurePath(charDir).joinpath(input('type in the character text file name (do not include file extension): ')+'.txt')
-print(testFile)
-print('\n\n')
-queryList = []
-# Try asking for the queries:
-# name = "William"
-# Lord of Oswestry
-while True:
-    tempVar = input('Hit [ENTER] to begin searching, or type in query to add.\n\tInput: ')
-    if tempVar:
-        queryList.append(tempVar)
-        print('Current Queries are:')
-        print(queryList)
-        print('\n')
-    else:
-        break
-with open(testFile) as f:
-    fileSearchCK3(f, 0, *queryList)
+file_entry = build_file_entry(root)
+query_entry = build_query_entry(root)
+search_button = build_search_button(root)
+result_var, result_view = build_result_view(root)
+root.deiconify()
+root.mainloop()
