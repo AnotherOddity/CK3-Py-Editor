@@ -181,6 +181,9 @@ def fileSearchCK3(file, logicType, *query):
     currentEntry = []
     selectedEntries = []
     ofInterest = []
+    currentLines = []
+    selectedLines = []
+    #ODDITY TODO LINES
     for i in range(len(query)):
         ofInterest.append(False)
     curlyBraces = 0
