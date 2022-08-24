@@ -1,5 +1,6 @@
 import pathlib
 import tkinter as tk
+import tkinter as ttk
 import tkinter.filedialog
 from sys import exit as safeExit
 
@@ -77,10 +78,12 @@ def build_query_entries(parent):
         entry.pack()
         entries.append(entry)
     var = tk.IntVar()
-    button1 = tk.Radiobutton(parent, text="Match any", variable=var, value=1)
-    button2 = tk.Radiobutton(parent, text="Match all", variable=var, value=0)
-    button1.pack()
-    button2.pack()
+    buttons = tk.Frame(parent)
+    button1 = tk.Radiobutton(buttons, text="Match any", variable=var, value=1)
+    button2 = tk.Radiobutton(buttons, text="Match all", variable=var, value=0)
+    button1.pack(side = tk.LEFT)
+    button2.pack(side = tk.RIGHT)
+    buttons.pack()
     return entries, var
 
 def build_search_button(parent):
