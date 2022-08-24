@@ -1,17 +1,12 @@
 import pathlib
 import tkinter as tk
-import tkinter as ttk
+from tkinter import ttk
 import tkinter.filedialog
 from sys import exit as safeExit
 
 from Ck3PyModules import find_ck3
 
 def ask_user_ck3_dir():
-    #Initialising a tkinter root window.
-    root = tk.Tk()
-    root.withdraw() #Hiding, but not closing, the root window.
-    root.attributes('-topmost', True)
-
     #This asks the user to locate the vanilla CK3 game files.
     while True:
         strRootDir = tk.filedialog.askdirectory(
@@ -104,8 +99,8 @@ def build_result_view(parent):
     canvas.configure(yscrollcommand=scrollbar.set)
 
     var = tk.StringVar()
-    view = tk.Label(scrollable_frame, height=20, width=80, textvariable=var, anchor='nw')
-    view.pack()
+    view = tk.Label(scrollable_frame, height=20, width=80, textvariable=var, anchor='nw', justify="left")
+    view.pack(side="left")
 
     container.pack()
     canvas.pack(side="left", fill="both", expand=True)
@@ -216,10 +211,14 @@ def fileSearchCK3(file, logicType, *query):
                 currentEntry = []
     else:
         print('CHECKPOINT!\n\n')
+        outtext = ""
         for i in selectedEntries:
             for j in i:
+                outtext += j.replace('\t', '        ')
                 print(j.rstrip('\n'))
+            outtext += '\n\n'
             print('\n\n')
+        return outtext
 
 
 file_entry = build_file_entry(root)
