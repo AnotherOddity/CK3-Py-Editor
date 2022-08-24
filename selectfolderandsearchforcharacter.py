@@ -39,6 +39,82 @@ def ask_user_ck3_dir():
                 safeExit('Exiting program...')
     return pathlib.Path(strRootDir)
 
+def doSearch():
+    charDir = pathlib.PurePath(pathRootDir).joinpath('history', 'characters')
+    print(charDir)
+    fileName = file_entry.get()
+    if not fileName.endswith(".txt"):
+        fileName += ".txt"
+    testFile = charDir.joinpath(fileName)
+    print(testFile)
+    print('\n\n')
+    queryList = []
+    for entry in query_entries:
+        query = entry.get()
+        if query:
+            queryList.append(query)
+    logicType = match_var.get()
+    with open(testFile) as f:
+        text = fileSearchCK3(f, logicType, *queryList)
+    if text is None or not text:
+        text = "None found."
+    result_var.set(text)
+    result_view.configure(height=len(text.splitlines()))
+
+def build_file_entry(parent):
+    label = tk.Label(parent, text="File to search:")
+    entry = tk.Entry(parent)
+    label.pack()
+    entry.pack()
+    return entry
+
+def build_query_entries(parent):
+    entries = []
+    for i in range(1, 4):
+        label = tk.Label(parent, text="Query string %d:" % i)
+        entry = tk.Entry(parent)
+        label.pack()
+        entry.pack()
+        entries.append(entry)
+    var = tk.IntVar()
+    button1 = tk.Radiobutton(parent, text="Match any", variable=var, value=1)
+    button2 = tk.Radiobutton(parent, text="Match all", variable=var, value=0)
+    button1.pack()
+    button2.pack()
+    return entries, var
+
+def build_search_button(parent):
+    button = tk.Button(parent, text="Search", command=doSearch)
+    button.pack()
+    return button
+
+def build_result_view(parent):
+    # tutorial https://blog.teclado.com/tkinter-scrollable-frames/
+    container = ttk.Frame(parent)
+    canvas = tk.Canvas(container)
+    scrollbar = ttk.Scrollbar(container, orient="vertical", command=canvas.yview)
+    scrollable_frame = ttk.Frame(canvas)
+    scrollable_frame.bind("<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+
+    var = tk.StringVar()
+    view = tk.Label(scrollable_frame, height=20, width=80, textvariable=var, anchor='nw')
+    view.pack()
+
+    container.pack()
+    canvas.pack(side="left", fill="both", expand=True)
+    scrollbar.pack(side="right", fill="y")
+
+    return (var, view)
+
+#Initialising a tkinter root window.
+root = tk.Tk()
+root.withdraw() #Hiding, but not closing, the root window.
+root.attributes('-topmost', True)
+
 pathRootDir = None
 try:
     pathRootDir = find_ck3.find_ck3_game_directory()
@@ -143,24 +219,9 @@ def fileSearchCK3(file, logicType, *query):
             print('\n\n')
 
 
-
-charDir = pathlib.PurePath(pathRootDir).joinpath('history', 'characters')
-print(charDir)
-testFile = pathlib.PurePath(charDir).joinpath(input('type in the character text file name (do not include file extension): ')+'.txt')
-print(testFile)
-print('\n\n')
-queryList = []
-# Try asking for the queries:
-# name = "William"
-# Lord of Oswestry
-while True:
-    tempVar = input('Hit [ENTER] to begin searching, or type in query to add.\n\tInput: ')
-    if tempVar:
-        queryList.append(tempVar)
-        print('Current Queries are:')
-        print(queryList)
-        print('\n')
-    else:
-        break
-with open(testFile) as f:
-    fileSearchCK3(f, 0, *queryList)
+file_entry = build_file_entry(root)
+query_entries, match_var = build_query_entries(root)
+search_button = build_search_button(root)
+result_var, result_view = build_result_view(root)
+root.deiconify()
+root.mainloop()
